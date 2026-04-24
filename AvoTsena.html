@@ -1,0 +1,1641 @@
+<!DOCTYPE html>
+<html lang="mg">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AvoTsena – Tsena Lehibe Malagasy</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+/* ===== RESET & VARIABLES ===== */
+:root{
+  --red:#E60012;--red-dark:#B8000F;--orange:#FF6600;--yellow:#FFAA00;
+  --green:#00AA44;--blue:#0066CC;--bg:#F2F2F2;--white:#FFF;
+  --dark:#111;--g1:#F8F8F8;--g2:#EEEEEE;--g3:#DDDDDD;--g4:#BBBBBB;
+  --g5:#888;--g7:#444;--text:#222;
+  --sh1:0 1px 4px rgba(0,0,0,.08);--sh2:0 4px 12px rgba(0,0,0,.14);
+  --sh3:0 8px 24px rgba(0,0,0,.18);
+  --r1:4px;--r2:8px;--r3:12px;--tr:.18s ease;
+  --nh:60px;--ch:44px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-top:calc(var(--nh)+var(--ch))}
+a{text-decoration:none;color:inherit}
+button{cursor:pointer;border:none;outline:none;font-family:inherit}
+input,select{font-family:inherit;outline:none}
+img{display:block;max-width:100%}
+ul{list-style:none}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:var(--g4);border-radius:3px}
+
+/* ===== NOTIFICATION ===== */
+#notif{
+  position:fixed;top:76px;right:20px;z-index:99999;
+  padding:12px 18px;border-radius:var(--r2);color:#fff;
+  font-weight:700;font-size:13px;box-shadow:var(--sh3);
+  transform:translateX(calc(100% + 40px));
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1);
+  max-width:280px;display:flex;align-items:center;gap:8px;
+  pointer-events:none;
+}
+#notif.show{transform:translateX(0)}
+#notif.success{background:var(--green)}
+#notif.error{background:var(--red)}
+#notif.info{background:var(--blue)}
+#notif.cart{background:var(--orange)}
+
+/* ===== OVERLAY ===== */
+.overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:3000;
+  display:none;align-items:center;justify-content:center;padding:16px;
+}
+.overlay.active{display:flex}
+
+/* ===== TOP NAVBAR ===== */
+#navbar{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  background:var(--red);height:var(--nh);
+  display:flex;align-items:center;padding:0 16px;gap:12px;
+  box-shadow:0 2px 8px rgba(0,0,0,.25);
+}
+.nav-logo{
+  font-family:'Baloo 2',cursive;font-size:27px;font-weight:800;
+  color:#fff;cursor:pointer;white-space:nowrap;letter-spacing:-.5px;
+  flex-shrink:0;
+}
+.nav-logo span{color:var(--yellow)}
+.nav-search{flex:1;display:flex;max-width:680px;height:38px}
+.nav-search-cat{
+  background:var(--yellow);border:none;padding:0 10px;
+  border-radius:var(--r1) 0 0 var(--r1);font-size:11px;font-weight:800;
+  cursor:pointer;white-space:nowrap;min-width:80px;
+}
+.nav-search-cat:hover{background:#ffbb00}
+.nav-search input{
+  flex:1;border:2.5px solid var(--yellow);border-left:none;border-right:none;
+  padding:0 14px;font-size:14px;min-width:0;
+}
+.nav-search input::placeholder{color:#aaa}
+.nav-search-btn{
+  background:var(--yellow);padding:0 18px;
+  border-radius:0 var(--r1) var(--r1) 0;font-size:16px;
+}
+.nav-search-btn:hover{background:#ffbb00}
+.nav-actions{display:flex;align-items:center;gap:2px;margin-left:auto;flex-shrink:0}
+.nav-btn{
+  background:transparent;color:#fff;padding:6px 9px;
+  border-radius:var(--r1);font-size:11px;
+  display:flex;flex-direction:column;align-items:center;gap:1px;
+  transition:background var(--tr);position:relative;
+}
+.nav-btn:hover{background:rgba(255,255,255,.18)}
+.nav-btn i{font-size:19px}
+.nav-btn span{font-size:10px;font-weight:700}
+.nav-badge{
+  position:absolute;top:2px;right:2px;background:var(--yellow);
+  color:var(--dark);font-size:10px;font-weight:800;
+  min-width:17px;height:17px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;padding:0 2px;
+}
+
+/* ===== CATEGORY NAV ===== */
+#cat-nav{
+  position:fixed;top:var(--nh);left:0;right:0;z-index:999;
+  background:var(--red-dark);height:var(--ch);
+  display:flex;align-items:center;padding:0 12px;gap:2px;
+  overflow-x:auto;scrollbar-width:none;
+}
+#cat-nav::-webkit-scrollbar{display:none}
+.cn-item{
+  background:transparent;color:rgba(255,255,255,.85);
+  padding:6px 12px;border-radius:var(--r1);font-size:12px;font-weight:700;
+  cursor:pointer;white-space:nowrap;
+  transition:all var(--tr);flex-shrink:0;
+}
+.cn-item:hover,.cn-item.active{background:var(--yellow);color:var(--dark)}
+
+/* ===== LAYOUT ===== */
+.container{max-width:1400px;margin:0 auto;padding:0 14px}
+.page-content{padding:12px 0}
+
+/* ===== SECTION ===== */
+.section{background:var(--white);border-radius:var(--r3);margin-bottom:12px;overflow:hidden}
+.sec-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 20px 12px;border-bottom:2px solid var(--g2);
+}
+.sec-title{
+  font-family:'Baloo 2',cursive;font-size:20px;font-weight:800;
+  display:flex;align-items:center;gap:8px;
+}
+.sec-more{
+  color:var(--red);font-size:13px;font-weight:700;cursor:pointer;
+  display:flex;align-items:center;gap:4px;
+}
+.sec-more:hover{text-decoration:underline}
+
+/* ===== HERO BANNER ===== */
+.banner-wrap{background:#fff;margin-bottom:12px;border-radius:var(--r3);overflow:hidden;padding:12px 0}
+.banner-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px;padding:0 14px}
+.ban-main{border-radius:var(--r2);overflow:hidden;height:280px;position:relative;cursor:pointer}
+.ban-side{display:flex;flex-direction:column;gap:10px}
+.ban-sm{border-radius:var(--r2);overflow:hidden;height:135px;position:relative;cursor:pointer}
+.ban-img{width:100%;height:100%;object-fit:cover;transition:transform .35s ease}
+.ban-main:hover .ban-img,.ban-sm:hover .ban-img{transform:scale(1.04)}
+.ban-ov{
+  position:absolute;inset:0;
+  background:linear-gradient(140deg,rgba(0,0,0,.65) 0%,transparent 55%);
+  display:flex;flex-direction:column;justify-content:flex-end;padding:20px;color:#fff;
+}
+.ban-tag{
+  background:var(--red);display:inline-block;padding:3px 10px;
+  border-radius:20px;font-size:10px;font-weight:800;margin-bottom:8px;width:fit-content;
+}
+.ban-title{font-family:'Baloo 2',cursive;font-size:22px;font-weight:800;line-height:1.2;margin-bottom:4px}
+.ban-sub{font-size:13px;opacity:.9}
+.ban-btn{
+  margin-top:10px;background:#fff;color:var(--red);padding:8px 18px;
+  border-radius:20px;font-weight:800;font-size:12px;cursor:pointer;
+  display:inline-block;transition:all var(--tr);width:fit-content;
+}
+.ban-btn:hover{background:var(--yellow);color:var(--dark)}
+
+/* ===== FLASH SALE ===== */
+.flash-hdr{
+  padding:14px 20px 12px;display:flex;align-items:center;gap:14px;
+  border-bottom:2px solid var(--g2);flex-wrap:wrap;
+}
+.flash-title{
+  font-family:'Baloo 2',cursive;font-size:22px;font-weight:800;
+  color:var(--red);display:flex;align-items:center;gap:8px;
+}
+.flash-timer{display:flex;align-items:center;gap:5px}
+.t-unit{
+  background:var(--dark);color:#fff;font-family:'Baloo 2',cursive;
+  font-size:18px;font-weight:800;padding:4px 8px;border-radius:var(--r1);
+  min-width:36px;text-align:center;
+}
+.t-sep{color:var(--red);font-weight:800;font-size:18px}
+.flash-prods{display:flex;overflow-x:auto;padding:16px;gap:12px;scrollbar-width:none}
+.flash-prods::-webkit-scrollbar{display:none}
+
+/* FLASH CARD */
+.fp-card{
+  min-width:155px;cursor:pointer;border:1px solid var(--g3);
+  border-radius:var(--r2);overflow:hidden;background:#fff;
+  transition:all var(--tr);flex-shrink:0;
+}
+.fp-card:hover{transform:translateY(-2px);box-shadow:var(--sh2)}
+.fp-img{position:relative;height:155px;overflow:hidden}
+.fp-img img{width:100%;height:100%;object-fit:cover;transition:transform .3s}
+.fp-card:hover .fp-img img{transform:scale(1.05)}
+.fp-bdg{
+  position:absolute;top:8px;left:8px;background:var(--red);color:#fff;
+  font-size:11px;font-weight:800;padding:3px 7px;border-radius:var(--r1);
+}
+.fp-prog-wrap{height:5px;background:var(--g2);margin:0 8px;border-radius:3px;overflow:hidden}
+.fp-prog{height:100%;background:linear-gradient(to right,var(--orange),var(--red));border-radius:3px}
+.fp-prog-txt{font-size:10px;color:var(--g5);padding:3px 8px 8px}
+.fp-info{padding:8px 10px 10px}
+.fp-name{font-size:12px;font-weight:600;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:5px;line-height:1.4}
+.fp-price{color:var(--red);font-family:'Baloo 2',cursive;font-weight:800;font-size:15px}
+.fp-old{color:var(--g4);font-size:11px;text-decoration:line-through;margin-left:4px}
+
+/* ===== CATEGORIES GRID ===== */
+.cats-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;padding:14px 12px}
+.cat-item{
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  cursor:pointer;padding:10px 4px;border-radius:var(--r2);
+  transition:all var(--tr);
+}
+.cat-item:hover{background:var(--g1);transform:translateY(-2px)}
+.cat-ico{
+  width:52px;height:52px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;color:#fff;flex-shrink:0;
+}
+.cat-lbl{font-size:10px;font-weight:700;text-align:center;color:var(--text);line-height:1.3}
+
+/* ===== PRODUCT GRID ===== */
+.prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:10px;padding:14px}
+
+/* ===== PRODUCT CARD ===== */
+.pc{
+  background:#fff;border-radius:var(--r2);overflow:hidden;
+  border:1px solid var(--g2);cursor:pointer;transition:all var(--tr);position:relative;
+}
+.pc:hover{transform:translateY(-3px);box-shadow:var(--sh2);border-color:var(--g3)}
+.pc-img{position:relative;padding-top:100%;overflow:hidden}
+.pc-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .35s}
+.pc:hover .pc-img img{transform:scale(1.06)}
+.pc-bdg{position:absolute;top:8px;left:8px;font-size:10px;font-weight:800;padding:3px 6px;border-radius:var(--r1);z-index:1}
+.bdg-sale{background:var(--red);color:#fff}
+.bdg-new{background:var(--green);color:#fff}
+.bdg-hot{background:var(--orange);color:#fff}
+.wl-btn{
+  position:absolute;top:8px;right:8px;width:28px;height:28px;
+  border-radius:50%;background:#fff;border:none;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;box-shadow:var(--sh1);z-index:1;
+  opacity:0;transition:all var(--tr);font-size:13px;color:var(--g4);
+}
+.pc:hover .wl-btn{opacity:1}
+.wl-btn.active{color:var(--red)!important;opacity:1!important}
+.wl-btn:hover{transform:scale(1.12)}
+.pc-info{padding:10px 12px 12px}
+.pc-name{
+  font-size:12px;color:var(--text);font-weight:600;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+  overflow:hidden;line-height:1.4;margin-bottom:6px;
+}
+.pc-pr-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px}
+.pc-price{color:var(--red);font-family:'Baloo 2',cursive;font-weight:800;font-size:16px}
+.pc-old{color:var(--g4);font-size:11px;text-decoration:line-through}
+.pc-disc{background:var(--red);color:#fff;font-size:10px;font-weight:800;padding:1px 5px;border-radius:3px}
+.pc-rat{display:flex;align-items:center;gap:4px;margin-bottom:6px}
+.stars{color:var(--yellow);font-size:11px}
+.rat-cnt{font-size:11px;color:var(--g5)}
+.pc-ship{font-size:11px;color:var(--green);font-weight:700}
+.pc-add{
+  width:100%;background:var(--red);color:#fff;border:none;
+  padding:8px;border-radius:var(--r1);font-weight:700;font-size:12px;
+  cursor:pointer;margin-top:8px;transition:background var(--tr);
+}
+.pc-add:hover{background:var(--red-dark)}
+
+/* ===== PRODUCT DETAIL PANEL ===== */
+#pd-panel{
+  position:fixed;inset:0;z-index:4000;background:#fff;
+  overflow-y:auto;display:none;
+}
+#pd-panel.open{display:block}
+.pd-topbar{
+  position:sticky;top:0;background:var(--red);color:#fff;
+  display:flex;align-items:center;gap:12px;padding:0 16px;height:52px;z-index:1;
+}
+.pd-back{background:transparent;color:#fff;font-size:20px;cursor:pointer;padding:4px 8px}
+.pd-topbar-title{font-family:'Baloo 2',cursive;font-weight:800;font-size:17px;flex:1}
+.pd-wrap{display:grid;grid-template-columns:1fr 1fr;gap:24px;padding:20px;max-width:1200px;margin:0 auto}
+.pd-imgs{position:sticky;top:68px;height:fit-content}
+.pd-main-img{border-radius:var(--r3);overflow:hidden;margin-bottom:10px;border:1px solid var(--g2)}
+.pd-main-img img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
+.thumb-row{display:flex;gap:8px;overflow-x:auto}
+.thumb{width:68px;height:68px;border-radius:var(--r1);overflow:hidden;cursor:pointer;border:2px solid transparent;flex-shrink:0;transition:border-color var(--tr)}
+.thumb.active{border-color:var(--red)}
+.thumb img{width:100%;height:100%;object-fit:cover}
+
+.pd-info{padding-top:4px}
+.pd-title{font-size:18px;font-weight:700;line-height:1.4;margin-bottom:10px}
+.pd-price-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.pd-price{color:var(--red);font-family:'Baloo 2',cursive;font-size:28px;font-weight:800}
+.pd-old{color:var(--g4);font-size:16px;text-decoration:line-through}
+.pd-disc-tag{background:var(--red);color:#fff;font-size:13px;font-weight:800;padding:3px 8px;border-radius:var(--r1)}
+.pd-rat-row{display:flex;align-items:center;gap:8px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--g2)}
+.pd-rat-row .stars{font-size:14px}
+.pd-rat-row .rat-cnt{font-size:13px;color:var(--g5)}
+.pd-orders{font-size:13px;color:var(--g5)}
+
+.pd-section{margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--g2)}
+.pd-sec-title{font-size:13px;font-weight:700;color:var(--g5);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+
+/* Variants */
+.var-row{display:flex;flex-wrap:wrap;gap:8px}
+.var-btn{
+  padding:6px 14px;border:2px solid var(--g3);border-radius:var(--r1);
+  font-size:13px;font-weight:700;cursor:pointer;background:#fff;
+  transition:all var(--tr);
+}
+.var-btn:hover{border-color:var(--red);color:var(--red)}
+.var-btn.active{border-color:var(--red);background:var(--red);color:#fff}
+.var-btn.disabled{opacity:.4;cursor:not-allowed;text-decoration:line-through}
+
+/* Color swatches */
+.swatch{
+  width:32px;height:32px;border-radius:50%;cursor:pointer;
+  border:3px solid transparent;transition:all var(--tr);flex-shrink:0;
+}
+.swatch:hover,.swatch.active{border-color:var(--red);transform:scale(1.1)}
+
+/* Qty */
+.qty-row{display:flex;align-items:center;gap:10px}
+.qty-ctrl{display:flex;align-items:center;border:2px solid var(--g3);border-radius:var(--r1);overflow:hidden}
+.qty-btn{width:34px;height:34px;background:#fff;border:none;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background var(--tr)}
+.qty-btn:hover{background:var(--g2)}
+.qty-num{width:42px;height:34px;border:none;border-left:2px solid var(--g3);border-right:2px solid var(--g3);text-align:center;font-size:14px;font-weight:700}
+.qty-stock{font-size:13px;color:var(--g5)}
+
+/* Actions */
+.pd-actions{display:flex;gap:10px;margin-top:16px}
+.btn-cart{
+  flex:1;background:var(--orange);color:#fff;padding:14px;
+  border-radius:var(--r2);font-size:15px;font-weight:800;
+  transition:background var(--tr);display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn-cart:hover{background:#e55500}
+.btn-buy{
+  flex:1;background:var(--red);color:#fff;padding:14px;
+  border-radius:var(--r2);font-size:15px;font-weight:800;
+  transition:background var(--tr);display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn-buy:hover{background:var(--red-dark)}
+
+/* Delivery info */
+.deli-row{display:flex;gap:10px;flex-wrap:wrap}
+.deli-item{display:flex;align-items:center;gap:8px;font-size:13px}
+.deli-ico{color:var(--green);font-size:15px}
+
+/* Specs */
+.specs-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.spec-row{display:flex;flex-direction:column;background:var(--g1);padding:8px 12px;border-radius:var(--r1)}
+.spec-key{font-size:10px;color:var(--g5);font-weight:700;text-transform:uppercase}
+.spec-val{font-size:13px;font-weight:700}
+
+/* Reviews */
+.rev-sum{display:flex;align-items:center;gap:20px;padding:16px;background:var(--g1);border-radius:var(--r2);margin-bottom:14px}
+.rev-big{font-family:'Baloo 2',cursive;font-size:48px;font-weight:800;color:var(--red)}
+.rev-bars{flex:1}
+.rev-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.rev-bar-lbl{font-size:12px;font-weight:700;width:30px}
+.rev-bar-bg{flex:1;height:6px;background:var(--g2);border-radius:3px;overflow:hidden}
+.rev-bar-fill{height:100%;background:var(--yellow);border-radius:3px}
+
+.rev-item{padding:14px 0;border-bottom:1px solid var(--g2)}
+.rev-item:last-child{border-bottom:none}
+.rev-hdr{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.rev-ava{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--red),var(--orange));display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:800;flex-shrink:0}
+.rev-user{font-weight:700;font-size:13px}
+.rev-date{font-size:11px;color:var(--g5);margin-left:auto}
+.rev-text{font-size:13px;line-height:1.6;color:var(--g7)}
+
+/* ===== CART DRAWER ===== */
+#cart-drawer{
+  position:fixed;top:0;right:0;bottom:0;width:400px;max-width:100vw;
+  background:#fff;z-index:5000;box-shadow:-4px 0 20px rgba(0,0,0,.2);
+  transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;
+}
+#cart-drawer.open{transform:translateX(0)}
+.cart-hdr{
+  background:var(--red);color:#fff;padding:16px 20px;
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
+}
+.cart-hdr-title{font-family:'Baloo 2',cursive;font-size:20px;font-weight:800;display:flex;align-items:center;gap:8px}
+.cart-close{background:transparent;color:#fff;font-size:22px;cursor:pointer;padding:4px}
+.cart-body{flex:1;overflow-y:auto;padding:12px}
+.cart-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:12px;color:var(--g5)}
+.cart-empty i{font-size:64px;opacity:.3}
+.cart-empty p{font-size:15px;font-weight:600}
+
+.ci{
+  display:flex;gap:10px;padding:12px;border:1px solid var(--g2);
+  border-radius:var(--r2);margin-bottom:8px;background:#fff;
+}
+.ci-img{width:80px;height:80px;border-radius:var(--r1);overflow:hidden;flex-shrink:0}
+.ci-img img{width:100%;height:100%;object-fit:cover}
+.ci-details{flex:1;min-width:0}
+.ci-name{font-size:12px;font-weight:600;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:4px}
+.ci-variant{font-size:11px;color:var(--g5);margin-bottom:6px}
+.ci-pr-row{display:flex;align-items:center;justify-content:space-between}
+.ci-price{color:var(--red);font-family:'Baloo 2',cursive;font-weight:800;font-size:15px}
+.ci-actions{display:flex;align-items:center;gap:8px}
+.ci-qty-ctrl{display:flex;align-items:center;border:1.5px solid var(--g3);border-radius:var(--r1);overflow:hidden}
+.ci-qty-btn{width:26px;height:26px;background:#fff;border:none;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.ci-qty-btn:hover{background:var(--g2)}
+.ci-qty{width:32px;height:26px;text-align:center;font-size:13px;font-weight:700;border:none;border-left:1.5px solid var(--g3);border-right:1.5px solid var(--g3)}
+.ci-del{background:transparent;color:var(--g4);font-size:15px;cursor:pointer;padding:4px;transition:color var(--tr)}
+.ci-del:hover{color:var(--red)}
+
+.cart-foot{
+  padding:16px;border-top:2px solid var(--g2);background:#fff;flex-shrink:0;
+}
+.cart-subtotal{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;font-size:14px}
+.cart-total-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.cart-total-lbl{font-size:16px;font-weight:700}
+.cart-total-price{font-family:'Baloo 2',cursive;font-size:22px;font-weight:800;color:var(--red)}
+.btn-checkout{
+  width:100%;background:var(--red);color:#fff;padding:14px;
+  border-radius:var(--r2);font-size:16px;font-weight:800;
+  transition:background var(--tr);display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn-checkout:hover{background:var(--red-dark)}
+
+/* ===== CHECKOUT MODAL ===== */
+.modal{
+  background:#fff;border-radius:var(--r3);max-width:560px;width:100%;
+  max-height:90vh;overflow-y:auto;
+}
+.modal-hdr{
+  background:var(--red);color:#fff;padding:18px 24px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-radius:var(--r3) var(--r3) 0 0;
+}
+.modal-hdr-title{font-family:'Baloo 2',cursive;font-size:19px;font-weight:800}
+.modal-close-btn{background:transparent;color:#fff;font-size:22px;cursor:pointer}
+.modal-body{padding:24px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.form-row.full{grid-template-columns:1fr}
+.form-grp{display:flex;flex-direction:column;gap:5px}
+.form-grp label{font-size:13px;font-weight:700;color:var(--g7)}
+.form-grp input,.form-grp select{
+  border:2px solid var(--g3);border-radius:var(--r1);
+  padding:10px 12px;font-size:14px;transition:border-color var(--tr);
+}
+.form-grp input:focus,.form-grp select:focus{border-color:var(--red)}
+.order-sum{background:var(--g1);border-radius:var(--r2);padding:14px;margin-bottom:16px}
+.order-sum-title{font-weight:800;font-size:14px;margin-bottom:10px}
+.order-sum-row{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;color:var(--g7)}
+.order-sum-total{display:flex;justify-content:space-between;font-size:16px;font-weight:800;padding-top:8px;border-top:1px solid var(--g3)}
+.order-sum-total span:last-child{color:var(--red);font-family:'Baloo 2',cursive}
+.btn-confirm{
+  width:100%;background:var(--red);color:#fff;padding:14px;
+  border-radius:var(--r2);font-size:16px;font-weight:800;
+  transition:background var(--tr);
+}
+.btn-confirm:hover{background:var(--red-dark)}
+
+/* SUCCESS */
+.success-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9000;
+  display:none;align-items:center;justify-content:center;padding:16px;
+}
+.success-overlay.active{display:flex}
+.success-card{
+  background:#fff;border-radius:var(--r3);padding:40px;
+  text-align:center;max-width:400px;width:100%;
+  animation:scaleIn .35s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes scaleIn{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+.success-ico{font-size:64px;color:var(--green);margin-bottom:16px}
+.success-card h2{font-family:'Baloo 2',cursive;font-size:22px;font-weight:800;margin-bottom:8px}
+.success-card p{color:var(--g5);font-size:14px;margin-bottom:20px}
+.btn-continue{
+  background:var(--red);color:#fff;padding:12px 28px;
+  border-radius:var(--r2);font-size:15px;font-weight:800;
+  transition:background var(--tr);
+}
+.btn-continue:hover{background:var(--red-dark)}
+
+/* ===== FOOTER ===== */
+footer{
+  background:var(--dark);color:#ddd;margin-top:20px;
+}
+.foot-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:30px;padding:32px 0}
+.foot-brand{font-family:'Baloo 2',cursive;font-size:24px;font-weight:800;color:#fff;margin-bottom:12px}
+.foot-brand span{color:var(--yellow)}
+.foot-desc{font-size:13px;line-height:1.7;color:#aaa;margin-bottom:16px}
+.foot-soc{display:flex;gap:10px}
+.soc-btn{
+  width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.1);
+  display:flex;align-items:center;justify-content:center;color:#fff;
+  font-size:15px;transition:background var(--tr);
+}
+.soc-btn:hover{background:var(--red)}
+.foot-col h4{color:#fff;font-size:14px;font-weight:800;margin-bottom:14px;text-transform:uppercase;letter-spacing:.5px}
+.foot-col ul{display:flex;flex-direction:column;gap:8px}
+.foot-col ul li a{font-size:13px;color:#aaa;transition:color var(--tr)}
+.foot-col ul li a:hover{color:var(--yellow)}
+.foot-bot{
+  border-top:1px solid rgba(255,255,255,.08);
+  padding:16px 0;display:flex;align-items:center;justify-content:space-between;
+  font-size:12px;color:#888;flex-wrap:wrap;gap:8px;
+}
+.foot-pay{display:flex;gap:8px;align-items:center}
+.pay-badge{
+  background:#fff;color:var(--dark);padding:3px 8px;border-radius:4px;
+  font-size:11px;font-weight:800;
+}
+
+/* ===== SEARCH RESULTS ===== */
+.search-results-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 20px;background:#fff;border-radius:var(--r3);margin-bottom:10px;
+}
+.sr-title{font-family:'Baloo 2',cursive;font-size:18px;font-weight:800}
+.sr-count{font-size:13px;color:var(--g5)}
+.filter-row{display:flex;gap:8px;flex-wrap:wrap}
+.filter-btn{
+  padding:6px 14px;border:2px solid var(--g3);border-radius:20px;
+  font-size:12px;font-weight:700;cursor:pointer;background:#fff;
+  transition:all var(--tr);
+}
+.filter-btn:hover,.filter-btn.active{border-color:var(--red);color:var(--red);background:#fff9f9}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:900px){
+  .banner-grid{grid-template-columns:1fr 1fr}
+  .ban-side:last-child{display:none}
+  .cats-grid{grid-template-columns:repeat(5,1fr)}
+  .pd-wrap{grid-template-columns:1fr}
+  .pd-imgs{position:static}
+  .foot-top{grid-template-columns:1fr 1fr}
+}
+@media(max-width:640px){
+  .banner-grid{grid-template-columns:1fr}
+  .ban-side{flex-direction:row}
+  .ban-sm{height:110px;flex:1}
+  .cats-grid{grid-template-columns:repeat(5,1fr)}
+  .prod-grid{grid-template-columns:repeat(2,1fr)}
+  .nav-btn span{display:none}
+  .foot-top{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- NOTIFICATION -->
+<div id="notif"><i class="fa-solid fa-check-circle"></i><span id="notif-txt"></span></div>
+
+<!-- CART DRAWER OVERLAY -->
+<div id="cart-ov" class="overlay" onclick="closeCart()"></div>
+
+<!-- NAVBAR -->
+<nav id="navbar">
+  <div class="nav-logo" onclick="showHome()">Avo<span>Tsena</span></div>
+  <div class="nav-search">
+    <select class="nav-search-cat" id="search-cat">
+      <option>Rehetra</option>
+      <option>Fitafiana</option>
+      <option>Elektrônika</option>
+      <option>Trano</option>
+      <option>Fanatanjahan-tena</option>
+      <option>Zanahary</option>
+      <option>Zaza</option>
+    </select>
+    <input type="text" id="search-inp" placeholder="Inona no tadiavina?" onkeydown="if(event.key==='Enter')doSearch()">
+    <button class="nav-search-btn" onclick="doSearch()"><i class="fa-solid fa-magnifying-glass"></i></button>
+  </div>
+  <div class="nav-actions">
+    <button class="nav-btn" onclick="showHome()"><i class="fa-solid fa-house"></i><span>Fandraisana</span></button>
+    <button class="nav-btn" onclick="openCart()">
+      <i class="fa-solid fa-cart-shopping"></i>
+      <span>Basket</span>
+      <span class="nav-badge" id="cart-badge">0</span>
+    </button>
+    <button class="nav-btn" onclick="showWishlist()"><i class="fa-solid fa-heart"></i><span>Tiako</span></button>
+    <button class="nav-btn" onclick="showOrders()"><i class="fa-solid fa-box"></i><span>Baiko</span></button>
+  </div>
+</nav>
+
+<!-- CATEGORY NAV -->
+<nav id="cat-nav">
+  <button class="cn-item active" onclick="filterCat('rehetra',this)">🏠 Rehetra</button>
+  <button class="cn-item" onclick="filterCat('fitafiana',this)">👗 Fitafiana</button>
+  <button class="cn-item" onclick="filterCat('elektronika',this)">📱 Elektrônika</button>
+  <button class="cn-item" onclick="filterCat('trano',this)">🏡 Trano</button>
+  <button class="cn-item" onclick="filterCat('fanatanjahana',this)">⚽ Fanatanjahana</button>
+  <button class="cn-item" onclick="filterCat('zanahary',this)">🌿 Zanahary</button>
+  <button class="cn-item" onclick="filterCat('zaza',this)">🧒 Zaza</button>
+  <button class="cn-item" onclick="filterCat('fiara',this)">🚗 Fiara</button>
+  <button class="cn-item" onclick="filterCat('hoavy',this)">💎 Hoavy</button>
+  <button class="cn-item" onclick="filterCat('sakafo',this)">🥘 Sakafo</button>
+  <button class="cn-item" onclick="filterCat('boky',this)">📚 Boky</button>
+  <button class="cn-item" onclick="filterCat('fanandroana',this)">🎮 Fanandroana</button>
+</nav>
+
+<!-- PRODUCT DETAIL PANEL -->
+<div id="pd-panel">
+  <div class="pd-topbar">
+    <button class="pd-back" onclick="closePD()"><i class="fa-solid fa-arrow-left"></i></button>
+    <div class="pd-topbar-title">Antsipiriany amin'ny vokatra</div>
+    <button class="nav-btn" onclick="openCart();closePD()">
+      <i class="fa-solid fa-cart-shopping"></i>
+      <span class="nav-badge" id="pd-cart-badge">0</span>
+    </button>
+  </div>
+  <div id="pd-content"></div>
+</div>
+
+<!-- CART DRAWER -->
+<div id="cart-drawer">
+  <div class="cart-hdr">
+    <div class="cart-hdr-title"><i class="fa-solid fa-cart-shopping"></i> Basket ahy</div>
+    <button class="cart-close" onclick="closeCart()"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="cart-body" id="cart-body"></div>
+  <div class="cart-foot" id="cart-foot"></div>
+</div>
+
+<!-- CHECKOUT OVERLAY -->
+<div class="overlay" id="checkout-ov">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-hdr-title"><i class="fa-solid fa-lock"></i> Fankatoavana ny baiko</div>
+      <button class="modal-close-btn" onclick="closeCheckout()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="order-sum" id="order-sum-preview"></div>
+      <div class="form-row">
+        <div class="form-grp">
+          <label>Anarana voalohany</label>
+          <input type="text" id="f-fname" placeholder="Rakoto">
+        </div>
+        <div class="form-grp">
+          <label>Fanamarinana anarana</label>
+          <input type="text" id="f-lname" placeholder="Rasoamahenina">
+        </div>
+      </div>
+      <div class="form-row full">
+        <div class="form-grp">
+          <label>Adiresy email</label>
+          <input type="email" id="f-email" placeholder="rakoto@gmail.com">
+        </div>
+      </div>
+      <div class="form-row full">
+        <div class="form-grp">
+          <label>Laharana telefaona</label>
+          <input type="tel" id="f-phone" placeholder="+261 34 00 000 00">
+        </div>
+      </div>
+      <div class="form-row full">
+        <div class="form-grp">
+          <label>Tanàna / Fokontany</label>
+          <input type="text" id="f-addr" placeholder="Ex: Analakely, Antananarivo">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-grp">
+          <label>Faritra</label>
+          <select id="f-region">
+            <option>Analamanga</option>
+            <option>Atsinanana</option>
+            <option>Boeny</option>
+            <option>Diana</option>
+            <option>Haute Matsiatra</option>
+            <option>Itasy</option>
+            <option>Menabe</option>
+            <option>Sofia</option>
+            <option>Vakinankaratra</option>
+            <option>Vatovavy</option>
+          </select>
+        </div>
+        <div class="form-grp">
+          <label>Fomba fandoavana</label>
+          <select id="f-pay">
+            <option>MVola</option>
+            <option>Orange Money</option>
+            <option>Airtel Money</option>
+            <option>Vola an-tanana (COD)</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn-confirm" onclick="confirmOrder()">
+        <i class="fa-solid fa-check-circle"></i> Manamarina ny baiko
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- SUCCESS OVERLAY -->
+<div class="success-overlay" id="success-ov">
+  <div class="success-card">
+    <div class="success-ico"><i class="fa-solid fa-circle-check"></i></div>
+    <h2>Baiko voaraisina! 🎉</h2>
+    <p>Misaotra tompoko! Ny baiko nataonao dia noraisina tsara.<br>Hanasoanay anao ny entanao ao anatin'ny 3–7 andro miasa.</p>
+    <button class="btn-continue" onclick="closeSuccess()">
+      <i class="fa-solid fa-arrow-left"></i> Manohy ny fividianana
+    </button>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<main id="main-content">
+  <div class="container page-content" id="page-home">
+    <!-- HERO BANNERS -->
+    <div class="banner-wrap">
+      <div class="banner-grid">
+        <div class="ban-main" onclick="filterCat('elektronika', document.querySelectorAll('.cn-item')[2])">
+          <img class="ban-img" src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&q=80" alt="Elektrônika">
+          <div class="ban-ov">
+            <span class="ban-tag">🔥 FIVAROTANA HOT</span>
+            <div class="ban-title">Elektrônika<br>Maoderina</div>
+            <div class="ban-sub">Hatramin'ny -70% ny fidinana</div>
+            <div class="ban-btn">Jereo izao</div>
+          </div>
+        </div>
+        <div class="ban-side">
+          <div class="ban-sm" onclick="filterCat('fitafiana', document.querySelectorAll('.cn-item')[1])">
+            <img class="ban-img" src="https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=400&q=80" alt="Fitafiana">
+            <div class="ban-ov">
+              <span class="ban-tag">⭐ VAOVAO</span>
+              <div class="ban-title" style="font-size:16px">Fitafiana 2025</div>
+              <div class="ban-sub" style="font-size:11px">Modely vaovao</div>
+            </div>
+          </div>
+          <div class="ban-sm" onclick="filterCat('trano', document.querySelectorAll('.cn-item')[3])">
+            <img class="ban-img" src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&q=80" alt="Trano">
+            <div class="ban-ov">
+              <span class="ban-tag">🏡 TRANO</span>
+              <div class="ban-title" style="font-size:16px">Fanaka Tsara</div>
+              <div class="ban-sub" style="font-size:11px">Hatramin'ny -50%</div>
+            </div>
+          </div>
+        </div>
+        <div class="ban-side">
+          <div class="ban-sm" onclick="filterCat('fanatanjahana', document.querySelectorAll('.cn-item')[4])">
+            <img class="ban-img" src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400&q=80" alt="Fanatanjahana">
+            <div class="ban-ov">
+              <span class="ban-tag">⚽ SPORT</span>
+              <div class="ban-title" style="font-size:16px">Fanatanjahana</div>
+              <div class="ban-sub" style="font-size:11px">Fitaovana rehetra</div>
+            </div>
+          </div>
+          <div class="ban-sm" onclick="filterCat('zaza', document.querySelectorAll('.cn-item')[6])">
+            <img class="ban-img" src="https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400&q=80" alt="Zaza">
+            <div class="ban-ov">
+              <span class="ban-tag">🧒 ZAZA</span>
+              <div class="ban-title" style="font-size:16px">Fitaovana Zaza</div>
+              <div class="ban-sub" style="font-size:11px">Sécurisé sy azo itokisana</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FLASH SALE -->
+    <div class="section">
+      <div class="flash-hdr">
+        <div class="flash-title"><i class="fa-solid fa-bolt"></i> FIVAROTANA MAINGAY</div>
+        <div class="flash-timer">
+          <span class="t-unit" id="t-h">05</span><span class="t-sep">:</span>
+          <span class="t-unit" id="t-m">47</span><span class="t-sep">:</span>
+          <span class="t-unit" id="t-s">23</span>
+        </div>
+        <button class="sec-more" onclick="showAllFlash()" style="margin-left:auto">Jereo rehetra <i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+      <div class="flash-prods" id="flash-prods"></div>
+    </div>
+
+    <!-- CATEGORIES -->
+    <div class="section">
+      <div class="sec-hdr">
+        <div class="sec-title">📦 Sokajy Vokatra</div>
+      </div>
+      <div class="cats-grid">
+        <div class="cat-item" onclick="filterCat('fitafiana',document.querySelectorAll('.cn-item')[1])">
+          <div class="cat-ico" style="background:linear-gradient(135deg,#FF6B9D,#C44B8A)">👗</div>
+          <div class="cat-lbl">Fitafiana</div>
+        </div>
+        <div class="cat-item" onclick="filterCat('elektronika',document.querySelectorAll('.cn-item')[2])">
+          <div class="cat-ico" style="background:linear-gradient(135deg,#4FACFE,#00F2FE)">📱</div>
+          <div class="cat-lbl">Elektrônika</div>
+        </div>
+        <div class="cat-item" onclick="filterCat('trano',document.querySelectorAll('.cn-item')[3])">
+          <div class="cat-ico" style="background:linear-gradient(135deg,#43E97B,#38F9D7)">🏡</div>
+          <div class="cat-lbl">Trano &amp; Fanaka</div>
+        </div>
+        <div class="cat-item" onclick="filterCat('fanatanjahana',document.querySelectorAll('.cn-item')[4])">
+          <div class="cat-ico" style="background:linear-gradient(135deg,#FA8231,#F7B731)">⚽</div>
+          <div class="cat-lbl">Fanatanjahana</div>
+        </div>
+        <div class="cat-item" onclick="filterCat('zanahary',document.querySelectorAll('.cn-item')[5])">
+          <div class="cat-ico" style="background:linear-gradient(135deg,#6C5CE7,#A29BFE)">🌿</div>
+          <div class="cat-lbl">Zanahary</div>
+        </div>
+        <div class="cat-item" onclick="filterCat('zaza',document.querySelectorAll('.cn-item')[6])">
+          <div class="cat-ico" style="background:linear-gradient(135deg,#FD79A8,#FDCB6E)">🧒</div>
+          <div class="cat-lbl">Zaza</div>
+        </div>
+        <div class="cat-item" onclick="filterCat('fiara',document.querySelectorAll('.cn-item')[7])">
+          <div class="cat-ico" style="background:linear-gradient(135deg,#636E72,#2D3436)">🚗</div>
+          <div class="cat-lbl">Fiara</div>
+        </div>
+        <div class="cat-item" onclick="filterCat('hoavy',document.querySelectorAll('.cn-item')[8])">
+          <div class="cat-ico" style="background:linear-gradient(135deg,#FDDB92,#D1FDFF)">💎</div>
+          <div class="cat-lbl">Hoavy &amp; Fiaramanidina</div>
+        </div>
+        <div class="cat-item" onclick="filterCat('sakafo',document.querySelectorAll('.cn-item')[9])">
+          <div class="cat-ico" style="background:linear-gradient(135deg,#E17055,#D63031)">🥘</div>
+          <div class="cat-lbl">Sakafo</div>
+        </div>
+        <div class="cat-item" onclick="filterCat('fanandroana',document.querySelectorAll('.cn-item')[11])">
+          <div class="cat-ico" style="background:linear-gradient(135deg,#0984E3,#74B9FF)">🎮</div>
+          <div class="cat-lbl">Fanandroana</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RECOMMENDED -->
+    <div class="section">
+      <div class="sec-hdr">
+        <div class="sec-title">⭐ Voatolotra ho Anao</div>
+        <button class="sec-more" onclick="filterCat('rehetra',document.querySelectorAll('.cn-item')[0])">Jereo rehetra <i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+      <div class="prod-grid" id="rec-grid"></div>
+    </div>
+
+    <!-- BEST SELLERS -->
+    <div class="section">
+      <div class="sec-hdr">
+        <div class="sec-title">🏆 Mivarotana Tsara Indrindra</div>
+        <button class="sec-more">Jereo rehetra <i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+      <div class="prod-grid" id="best-grid"></div>
+    </div>
+  </div>
+
+  <!-- CATEGORY / SEARCH RESULTS PAGE -->
+  <div class="container page-content" id="page-list" style="display:none">
+    <div class="search-results-hdr">
+      <div>
+        <div class="sr-title" id="list-title">Vokatra rehetra</div>
+        <div class="sr-count" id="list-count"></div>
+      </div>
+      <div class="filter-row">
+        <button class="filter-btn active" onclick="sortList('default',this)">Voafiliny</button>
+        <button class="filter-btn" onclick="sortList('price-asc',this)">Vidiny ↑</button>
+        <button class="filter-btn" onclick="sortList('price-desc',this)">Vidiny ↓</button>
+        <button class="filter-btn" onclick="sortList('rating',this)">Tsara indrindra</button>
+        <button class="filter-btn" onclick="sortList('newest',this)">Vaovao</button>
+      </div>
+    </div>
+    <div class="section">
+      <div class="prod-grid" id="list-grid"></div>
+    </div>
+  </div>
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="foot-top">
+      <div>
+        <div class="foot-brand">Avo<span>Tsena</span></div>
+        <div class="foot-desc">Ny tsena lehibe Malagasy, ahafahanao mividy sy mivarotra entana manerana an'i Madagasikara sy izao tontolo izao.</div>
+        <div class="foot-soc">
+          <a href="#" class="soc-btn"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" class="soc-btn"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="soc-btn"><i class="fab fa-tiktok"></i></a>
+          <a href="#" class="soc-btn"><i class="fab fa-whatsapp"></i></a>
+        </div>
+      </div>
+      <div class="foot-col">
+        <h4>AvoTsena</h4>
+        <ul>
+          <li><a href="#">Momba anay</a></li>
+          <li><a href="#">Fanaovana baiko</a></li>
+          <li><a href="#">Fanampiana</a></li>
+          <li><a href="#">Fifandraisan-tena</a></li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h4>Mpividy</h4>
+        <ul>
+          <li><a href="#">Ny baiko ahy</a></li>
+          <li><a href="#">Famerenana vola</a></li>
+          <li><a href="#">Fanamarinana</a></li>
+          <li><a href="#">Fandoavana</a></li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h4>Mpamokatra</h4>
+        <ul>
+          <li><a href="#">Mivarotra ao</a></li>
+          <li><a href="#">Tombontsoa VIP</a></li>
+          <li><a href="#">Politika</a></li>
+          <li><a href="#">API</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bot">
+      <span>© 2025 AvoTsena. Zo rehetra voatahiry.</span>
+      <div class="foot-pay">
+        <span style="font-size:11px;color:#888">Fandoavana:</span>
+        <span class="pay-badge" style="background:#F7931A;color:#fff">MVola</span>
+        <span class="pay-badge" style="background:#FF6600;color:#fff">Orange</span>
+        <span class="pay-badge" style="background:#E40000;color:#fff">Airtel</span>
+        <span class="pay-badge" style="background:#1A1A2E;color:#fff">COD</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ===========================
+// DATA — PRODUCTS
+// ===========================
+const PRODUCTS = [
+  // ELEKTRONIKA
+  {id:1,name:"Finday Smart Samsung Galaxy A55 5G 256GB",cat:"elektronika",price:1890000,oldPrice:2300000,img:"https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=400&q=80",imgs:["https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=400&q=80","https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=400&q=80","https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&q=80"],rating:4.8,ratingCount:2341,sold:5670,badge:"sale",ship:"Maimaim-poana ny fitevinam-bidy",colors:["#1A1A1A","#FFFFFF","#5A7FB0"],sizes:[],specs:{"Hafainganam-pandeha":"5G","Fitahirizana":"256GB","RAM":"8GB","Bateria":"5000mAh","Kamera":"50MP"},desc:"Finday maoderina indrindra amin'ny 2025. Ekrana AMOLED 6.6 tsara tarehy, kamera 50MP miaraka amin'ny AI, bateria 5000mAh maharitra.",reviews:[{user:"Lalao R.",stars:5,date:"15 Mar 2025",text:"Tsara be ilay finday! Naninjitra ilay izy haingana ka nahita eto AvoTsena. Mahafinaritra ny kamera!"},{user:"Hery M.",stars:5,date:"10 Mar 2025",text:"Iray amin'ireo finday tsara indrindra efa nividianako. Mandeha faingana sy battery maharitra."}],flash:true,flashProg:73},
+  {id:2,name:"Laptop HP 15s Intel i5 Gen 13 SSD 512GB",cat:"elektronika",price:3250000,oldPrice:4100000,img:"https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&q=80",imgs:["https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&q=80","https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=400&q=80"],rating:4.7,ratingCount:1203,sold:890,badge:"sale",ship:"Maimaim-poana ny fitevinam-bidy",colors:["#C0C0C0","#1A1A1A"],sizes:[],specs:{"Processeur":"Intel i5 Gen 13","RAM":"16GB","Fitahirizana":"512GB SSD","Ekrana":"15.6 Full HD","OS":"Windows 11"},desc:"Laptop mahery vaika ho an'ny asa sy fianaran-javatra. SSD faingana, RAM 16GB, fahariaran-toerana 10 ora.",reviews:[{user:"Noro S.",stars:5,date:"20 Mar 2025",text:"Mahay be ilay laptop! Mandeha faingana ny programa rehetra."},{user:"Tojo A.",stars:4,date:"8 Mar 2025",text:"Tsara ny kalitaony. Ambony kely ny vidiny fa mendrika."}],flash:true,flashProg:45},
+  {id:3,name:"Casque Bluetooth Sony WH-1000XM5 ANC",cat:"elektronika",price:650000,oldPrice:890000,img:"https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80",imgs:["https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80","https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=400&q=80"],rating:4.9,ratingCount:3210,sold:7800,badge:"hot",ship:"Maimaim-poana ny fitevinam-bidy",colors:["#1A1A1A","#BEB9AD"],sizes:[],specs:{"Fanaraha-maso":"Bluetooth 5.2","Bateria":"30 ora","ANC":"Eny","Lanja":"254g"},desc:"Casque mahay noising-cancelling indrindra amin'izao fotoana izao. Sony WH-1000XM5, mahafinaritra ny fihainoana mozika.",reviews:[{user:"Vola T.",stars:5,date:"22 Mar 2025",text:"Mahafinaritra be! Ny ANC dia tena mahery, tsisy feo miditra. Lasa tsy misy ataoko afa-tsy ity."}],flash:true,flashProg:60},
+  {id:4,name:"Tablette Samsung Tab A9+ 11 pouces 128GB",cat:"elektronika",price:980000,oldPrice:1350000,img:"https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=400&q=80",imgs:["https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=400&q=80"],rating:4.6,ratingCount:876,sold:2300,badge:"sale",ship:"Maimaim-poana",colors:["#1A1A1A","#808080"],sizes:[],specs:{"Ekrana":"11 pouce","Fitahirizana":"128GB","Bateria":"7040mAh","Kamera":"8MP"},desc:"Tablette lehibe sy tsara ny kalitaony. Ekrana goavana ho an'ny film sy asa.",reviews:[{user:"Mamy R.",stars:5,date:"1 Apr 2025",text:"Tsara indrindra ho an'ny ankizy sy ny asa. Ekrana be sy mahazava."}],flash:false,flashProg:0},
+  {id:5,name:"Smartwatch Apple Watch Series 9 GPS 45mm",cat:"elektronika",price:1250000,oldPrice:1600000,img:"https://images.unsplash.com/photo-1434493651957-4b4b9de89333?w=400&q=80",imgs:["https://images.unsplash.com/photo-1434493651957-4b4b9de89333?w=400&q=80"],rating:4.8,ratingCount:1540,sold:3200,badge:"hot",ship:"Maimaim-poana",colors:["#C0C0C0","#E03030","#222"],sizes:[],specs:{"Ekrana":"45mm OLED","GPS":"Eny","Fahasalaman-tena":"ECG, SpO2","Bateria":"18 ora"},desc:"Smartwatch lehibe indrindra. Manaraka ny fahasalamana sy ny fanatanjahana isan'andro.",reviews:[{user:"Kanto M.",stars:5,date:"5 Apr 2025",text:"Mahafinaritra be ilay izy! Manaraka ny fo tsara ary mampahafantatra raha misy olana."}],flash:true,flashProg:82},
+
+  // FITAFIANA
+  {id:6,name:"Akanjo Lahy Chemise Slim Fit Lamba Tsara",cat:"fitafiana",price:85000,oldPrice:120000,img:"https://images.unsplash.com/photo-1620012253295-c15cc3e65df4?w=400&q=80",imgs:["https://images.unsplash.com/photo-1620012253295-c15cc3e65df4?w=400&q=80","https://images.unsplash.com/photo-1594938298603-c8148c4b4a41?w=400&q=80"],rating:4.5,ratingCount:780,sold:4500,badge:"new",ship:"Maimaim-poana",colors:["#FFFFFF","#87CEEB","#2F4F4F"],sizes:["XS","S","M","L","XL","XXL"],specs:{"Akora":"100% Coton","Fomba":"Slim Fit","Loko":"Fotsy, Manga, Maitso"},desc:"Chemise elegant ho an'ny lahy. Akora coton tsara kalitao, manintona sy maharitra.",reviews:[{user:"Fidy R.",stars:5,date:"12 Mar 2025",text:"Tsara indrindra! Mendrika ilay vidiny. Hanafaina baiko indray."}],flash:false,flashProg:0},
+  {id:7,name:"Akanjo Vehivavy Robe Malagasy Lamba Landy",cat:"fitafiana",price:195000,oldPrice:280000,img:"https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=400&q=80",imgs:["https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=400&q=80"],rating:4.7,ratingCount:1240,sold:6700,badge:"hot",ship:"Maimaim-poana",colors:["#8B0000","#006400","#00008B"],sizes:["S","M","L","XL"],specs:{"Akora":"Landy Malagasy","Fomba":"Robe loha","Fikatrohana":"Vita tanana"},desc:"Robe Malagasy tena manakoarany. Vita amin'ny landy malagasy tena manintona.",reviews:[{user:"Zo V.",stars:5,date:"18 Mar 2025",text:"Mahafinaritra tokoa! Ny landy dia nalemy be ary ny loko dia tena tsara."},{user:"Anja H.",stars:4,date:"9 Apr 2025",text:"Tsara ny kalitaony. Manaraka ny saizo tsara."}],flash:false,flashProg:0},
+  {id:8,name:"Kiraro Nike Air Max 270 React",cat:"fitafiana",price:320000,oldPrice:450000,img:"https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80",imgs:["https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80","https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=400&q=80"],rating:4.8,ratingCount:2100,sold:8900,badge:"hot",ship:"Maimaim-poana",colors:["#FFFFFF","#1A1A1A","#FF4500"],sizes:["38","39","40","41","42","43","44","45"],specs:{"Marika":"Nike","Modely":"Air Max 270 React","Akora":"Mesh + Foam"},desc:"Kiraro Nike komesy sy mahafinaritra ny fanaovam-pitsangatsanganana. Air Max 270 React technology.",reviews:[{user:"Rado T.",stars:5,date:"20 Apr 2025",text:"Kiraro mahafinaritra be! Komesy ary tsara ny kalitao. Recomanda mafy."}],flash:true,flashProg:55},
+  {id:9,name:"Sac à main Femme Cuir Véritable Luxe",cat:"fitafiana",price:275000,oldPrice:400000,img:"https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400&q=80",imgs:["https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400&q=80"],rating:4.6,ratingCount:567,sold:1230,badge:"sale",ship:"Maimaim-poana",colors:["#8B4513","#1A1A1A","#F5F5F5"],sizes:[],specs:{"Akora":"Hoditra tena izy","Lanjany":"450g","Fanantenanana":"3 taona"},desc:"Valise vehivavy vita amin'ny hoditra tena izy. Elegant sy maharitra.",reviews:[{user:"Mira S.",stars:5,date:"2 Apr 2025",text:"Mahafinaritra be! Ny hoditra dia tena izy ary ny kalitao dia tsara indrindra."}],flash:false,flashProg:0},
+
+  // TRANO
+  {id:10,name:"Vary Mitsaka Philips HD3060 10L Rice Cooker",cat:"trano",price:185000,oldPrice:250000,img:"https://images.unsplash.com/photo-1585515320310-259814833e62?w=400&q=80",imgs:["https://images.unsplash.com/photo-1585515320310-259814833e62?w=400&q=80"],rating:4.7,ratingCount:3450,sold:12000,badge:"hot",ship:"Maimaim-poana",colors:["#FFFFFF","#808080"],sizes:[],specs:{"Tomba":"10 litatra","Herin'aratra":"900W","Tahan-panafainana":"Eny","Marika":"Philips"},desc:"Rice cooker mahay sy mahafinaritra. Manao vary tsara isan'andro, maivana ny fampiasana.",reviews:[{user:"Ravo M.",stars:5,date:"14 Mar 2025",text:"Manao vary tsara be! Tsy matahotra intsony ny vary hangam-bary."},{user:"Tina L.",stars:5,date:"28 Mar 2025",text:"Mahafinaritra be. Lasa malemy ny vary foana."}],flash:false,flashProg:0},
+  {id:11,name:"Tabilao Hazo Malagasy 160x80cm Ofisy",cat:"trano",price:450000,oldPrice:600000,img:"https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&q=80",imgs:["https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&q=80"],rating:4.5,ratingCount:234,sold:450,badge:"new",ship:"Maimaim-poana (Antananarivo)",colors:["#8B6914","#4A2E00"],sizes:[],specs:{"Habeny":"160x80x75cm","Akora":"Hazo Malagasy","Loko":"Voaravaka mahogany"},desc:"Tabilao ofisy vita amin'ny hazo malagasy tena tsara. Mateza sy mahafinaritra.",reviews:[{user:"Solo R.",stars:5,date:"7 Apr 2025",text:"Tsara indrindra ny hazo, mateza be. Hive indray avy amin'ny AvoTsena."}],flash:false,flashProg:0},
+  {id:12,name:"Fridge LG 260L Smart Inverter No Frost",cat:"trano",price:1650000,oldPrice:2200000,img:"https://images.unsplash.com/photo-1571175443880-49e1d25b2bc5?w=400&q=80",imgs:["https://images.unsplash.com/photo-1571175443880-49e1d25b2bc5?w=400&q=80"],rating:4.8,ratingCount:890,sold:2100,badge:"sale",ship:"Maimaim-poana + Natsangana maimaim-poana",colors:["#C0C0C0","#1A1A1A"],sizes:[],specs:{"Habeny":"260 litatra","Herin'aratra":"Inverter A++","No Frost":"Eny","Hatoka":"10 taona"},desc:"Frigo LG Smart Inverter mahay mitahiry harena. No Frost, tsy misy ady amin'ny ranomandry.",reviews:[{user:"Haja V.",stars:5,date:"1 Apr 2025",text:"Tsara be ny frigo! Tsy be loatra ny herinaratra ampiasainy."}],flash:true,flashProg:30},
+
+  // FANATANJAHANA
+  {id:13,name:"Trangam-panaovam-pitsangatsanganana Trek 26 pouces",cat:"fanatanjahana",price:580000,oldPrice:750000,img:"https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=400&q=80",imgs:["https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=400&q=80"],rating:4.6,ratingCount:345,sold:780,badge:"new",ship:"Maimaim-poana",colors:["#1A1A1A","#FF4500","#0000CD"],sizes:["XS","S","M","L"],specs:{"Gorodon":"Aluminina","Rodery":"26 pouce","Fandaminana":"21 vitesse","Lanjany":"12kg"},desc:"Bicycle maoderina ho an'ny fanatanjahana sy ny fitsangatsanganana. Mateza ary malaina.",reviews:[{user:"Jean-Paul R.",stars:4,date:"15 Apr 2025",text:"Tsara ilay bicycle! Mandeha tsara ary ny frein dia miasa tsara."}],flash:false,flashProg:0},
+  {id:14,name:"Fitaovana Gym Dumbbell Set 2-20kg Adjustable",cat:"fanatanjahana",price:390000,oldPrice:520000,img:"https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400&q=80",imgs:["https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400&q=80"],rating:4.7,ratingCount:1230,sold:3400,badge:"hot",ship:"Maimaim-poana",colors:["#1A1A1A"],sizes:[],specs:{"Lanjany":"2-20kg","Akora":"Vy miaraka amin'ny plastika","Set":"2 vy miaraka amin'ny fanazarana"},desc:"Dumbbell set adjustable ho an'ny exercice any an-trano. Mora fampiasana sy maharitra.",reviews:[{user:"Herizo M.",stars:5,date:"10 Apr 2025",text:"Tsara be! Tsy mila mandany vola amin'ny gym intsony."}],flash:true,flashProg:68},
+
+  // ZANAHARY
+  {id:15,name:"Vanilline Malagasy Pure 100g Premium Grade A",cat:"zanahary",price:45000,oldPrice:65000,img:"https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400&q=80",imgs:["https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400&q=80"],rating:4.9,ratingCount:4500,sold:25000,badge:"hot",ship:"Maimaim-poana",colors:[],sizes:["50g","100g","200g","500g"],specs:{"Karazany":"Bourbon Malagasy","Sokajy":"Grade A Premium","Fisakafoanana":"Tsy misy","Toerana":"SAVA, Madagascar"},desc:"Vanilline Malagasy Grade A, tsara indrindra amin'izao tontolo izao. Fofona manintona, tena izy.",reviews:[{user:"Marie T.",stars:5,date:"19 Mar 2025",text:"Tena vanilline tena izy avy any Madagasikara! Tsara indrindra efa nampiasako."},{user:"Sophie L.",stars:5,date:"25 Mar 2025",text:"Grade A tena izy. Mandefa any Frantsa aho ary midera foana ny fofona."}],flash:true,flashProg:90},
+  {id:16,name:"Ronono Cacao Malagasy Organic 250g",cat:"zanahary",price:28000,oldPrice:38000,img:"https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=400&q=80",imgs:["https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=400&q=80"],rating:4.8,ratingCount:2100,sold:8900,badge:"new",ship:"Maimaim-poana",colors:[],sizes:["250g","500g","1kg"],specs:{"Karazany":"Criollo Organic","Sokajy":"Fair Trade","Fisakafoanana":"Tsy misy GMO"},desc:"Poudre cacao malagasy organika, tsy misy fampanambarana. Tsara ny fahasalaman-tena.",reviews:[{user:"Aina R.",stars:5,date:"5 Apr 2025",text:"Tsara be ny cacao! Ny fofona dia mahafinaritra ary tena tena cacao izy."}],flash:false,flashProg:0},
+
+  // ZAZA
+  {id:17,name:"Kilalao Lego Duplo Classic Brick 85 Pièces",cat:"zaza",price:95000,oldPrice:135000,img:"https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80",imgs:["https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80"],rating:4.8,ratingCount:1200,sold:4500,badge:"new",ship:"Maimaim-poana",colors:["#E57373"],sizes:[],specs:{"Taona":"1.5-5 taona","Isan'ny vato":"85","Secoury":"Eny, CE"},desc:"Lego Duplo Classic ho an'ny zaza kely. Manampy amin'ny fampidirana ny sain-janaka.",reviews:[{user:"Patricia R.",stars:5,date:"20 Mar 2025",text:"Tia mafy ireo ankizy ity! Mitaingilana amin'izany isan'andro."}],flash:false,flashProg:0},
+  {id:18,name:"Posy Zaza Sécurisé Anti-allergy 0-12 mois",cat:"zaza",price:125000,oldPrice:170000,img:"https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400&q=80",imgs:["https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400&q=80"],rating:4.7,ratingCount:890,sold:3200,badge:"hot",ship:"Maimaim-poana",colors:["#FFF8DC","#87CEEB","#FFB6C1"],sizes:[],specs:{"Taona":"0-12 volana","Akora":"Coton organika 100%","Fanamarinana":"Oeko-Tex"},desc:"Posy zaza malemy sy tsy misy voa. Akora organika tsara ho an'ny hoditra kely.",reviews:[{user:"Claudia M.",stars:5,date:"8 Apr 2025",text:"Tsara be ny posy! Tsy misy voa ny zanako ary malemy be."}],flash:true,flashProg:40},
+
+  // FIARA
+  {id:19,name:"Dash Cam 4K GPS Sony Sensor Wi-Fi Car Camera",cat:"fiara",price:175000,oldPrice:240000,img:"https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&q=80",imgs:["https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&q=80"],rating:4.6,ratingCount:456,sold:1200,badge:"new",ship:"Maimaim-poana",colors:["#1A1A1A"],sizes:[],specs:{"Kalitao":"4K Ultra HD","GPS":"Eny","Wi-Fi":"Eny","Fitahirizana":"128GB SD"},desc:"Dashcam 4K GPS ho an'ny fiarana. Mitahiry ny diany rehetra amin'ny kalitao avo lenta.",reviews:[{user:"Luc R.",stars:5,date:"11 Apr 2025",text:"Tsara be! 4K tena miasa tsara. Afaka mitahiry ny lalana rehetra."}],flash:false,flashProg:0},
+
+  // HOAVY
+  {id:20,name:"Collier Or 18K Rojo Malagasy Diamond 2.5ct",cat:"hoavy",price:4500000,oldPrice:6000000,img:"https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=400&q=80",imgs:["https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=400&q=80"],rating:4.9,ratingCount:234,sold:89,badge:"hot",ship:"Maimaim-poana + Assurance",colors:["#FFD700","#C0C0C0"],sizes:[],specs:{"Metaly":"Or 18 karata","Vato":"Diamond 2.5ct","Lanjany":"8g","Fanantenanana":"Tsy voafetra"},desc:"Collier gold 18K miaraka amin'ny diamond tena izy. Vita tanana amin'ny mpisan-jombi mahay.",reviews:[{user:"Voahangy R.",stars:5,date:"3 Apr 2025",text:"Tsara indrindra! Nanafaingana ilay baiko ary tonga amin'ny boaty goavana tsara."}],flash:false,flashProg:0},
+
+  // SAKAFO
+  {id:21,name:"Hanamamy Koba Malagasy Organic 500g",cat:"sakafo",price:18000,oldPrice:24000,img:"https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&q=80",imgs:["https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&q=80"],rating:4.7,ratingCount:1890,sold:15000,badge:"new",ship:"Maimaim-poana",colors:[],sizes:["250g","500g","1kg"],specs:{"Akora":"Voankazo malagasy","Fisakafoanana":"Tsy misy additif","Hatakora":"6 volana"},desc:"Koba Malagasy organika tena izy. Vita amin'ny voankazo malagasy malaza.",reviews:[{user:"Nirina R.",stars:5,date:"15 Apr 2025",text:"Tsara be ny koba! Tena tena malagasy izy. Mividy isan'andro."}],flash:false,flashProg:0},
+
+  // BOKY
+  {id:22,name:"Boky Fianaran-javatra Python Programming Ho Anao",cat:"boky",price:35000,oldPrice:50000,img:"https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400&q=80",imgs:["https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400&q=80"],rating:4.8,ratingCount:567,sold:2300,badge:"new",ship:"Maimaim-poana",colors:[],sizes:[],specs:{"Teny":"Malagasy","Pejy":"380","Sokajy":"Informatique","Dikan-teny":"2025"},desc:"Fianaran-javatra Python amin'ny teny Malagasy. Ho an'ny mpianatra sy ny mpiasa.",reviews:[{user:"Feno R.",stars:5,date:"12 Apr 2025",text:"Tsara be! Voalohany mahay Python amin'ny teny Malagasy. Misaotra!"}],flash:false,flashProg:0},
+
+  // FANANDROANA
+  {id:23,name:"Console Nintendo Switch OLED Mario Bundle",cat:"fanandroana",price:1350000,oldPrice:1700000,img:"https://images.unsplash.com/photo-1578303512597-81e6cc155b3e?w=400&q=80",imgs:["https://images.unsplash.com/photo-1578303512597-81e6cc155b3e?w=400&q=80"],rating:4.9,ratingCount:2340,sold:5600,badge:"hot",ship:"Maimaim-poana",colors:["#FFFFFF","#1A1A1A"],sizes:[],specs:{"Ekrana":"7 pouce OLED","Bateria":"4.5-9 ora","Fitahirizana":"64GB","Online":"Eny"},desc:"Nintendo Switch OLED miaraka amin'ny Mario Bundle. Fitaovana fihirahana tena malaza.",reviews:[{user:"Lanto V.",stars:5,date:"20 Apr 2025",text:"Tsara indrindra! Ny OLED dia mahafinaritra be ny ekrana."},{user:"Dina M.",stars:5,date:"10 Apr 2025",text:"Hita eto ny vidiny tsara indrindra. Mitovitovy sy ao amin'ny indabiretsy."}],flash:true,flashProg:78},
+];
+
+// ===========================
+// STATE
+// ===========================
+let cart = JSON.parse(localStorage.getItem('avt-cart') || '[]');
+let wishlist = JSON.parse(localStorage.getItem('avt-wish') || '[]');
+let currentProd = null;
+let currentCat = 'rehetra';
+let currentSort = 'default';
+let flashInterval = null;
+
+function saveCart(){localStorage.setItem('avt-cart',JSON.stringify(cart))}
+function saveWish(){localStorage.setItem('avt-wish',JSON.stringify(wishlist))}
+
+// ===========================
+// NOTIFICATION
+// ===========================
+let notifTimeout = null;
+function showNotif(msg, type='success'){
+  const el = document.getElementById('notif');
+  const txt = document.getElementById('notif-txt');
+  const icons = {success:'fa-circle-check', error:'fa-circle-xmark', info:'fa-circle-info', cart:'fa-cart-plus'};
+  el.querySelector('i').className = `fa-solid ${icons[type]||'fa-circle-check'}`;
+  txt.textContent = msg;
+  el.className = `show ${type}`;
+  clearTimeout(notifTimeout);
+  notifTimeout = setTimeout(()=> el.className = type, 2800);
+}
+
+// ===========================
+// CART BADGE
+// ===========================
+function updateCartBadge(){
+  const total = cart.reduce((s,i)=>s+i.qty,0);
+  ['cart-badge','pd-cart-badge'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.textContent = total;
+  });
+}
+
+// ===========================
+// CART
+// ===========================
+function openCart(){
+  document.getElementById('cart-drawer').classList.add('open');
+  document.getElementById('cart-ov').classList.add('active');
+  renderCart();
+}
+function closeCart(){
+  document.getElementById('cart-drawer').classList.remove('open');
+  document.getElementById('cart-ov').classList.remove('active');
+}
+function renderCart(){
+  const body = document.getElementById('cart-body');
+  const foot = document.getElementById('cart-foot');
+  if(!cart.length){
+    body.innerHTML = `<div class="cart-empty"><i class="fa-solid fa-cart-shopping"></i><p>Tsy misy ao amin'ny basket</p><p style="font-size:13px;color:var(--g4)">Manomboka mividy ianao!</p></div>`;
+    foot.innerHTML = '';
+    return;
+  }
+  body.innerHTML = cart.map((item,idx)=>`
+    <div class="ci" id="ci-${idx}">
+      <div class="ci-img"><img src="${item.img}" alt="${item.name}" loading="lazy"></div>
+      <div class="ci-details">
+        <div class="ci-name">${item.name}</div>
+        ${item.variant ? `<div class="ci-variant">${item.variant}</div>` : ''}
+        <div class="ci-pr-row">
+          <div class="ci-price">${fmtPrice(item.price * item.qty)}</div>
+          <div class="ci-actions">
+            <div class="ci-qty-ctrl">
+              <button class="ci-qty-btn" onclick="changeQty(${idx},-1)">−</button>
+              <input class="ci-qty" type="number" value="${item.qty}" min="1" max="99"
+                onchange="setQty(${idx},this.value)" readonly>
+              <button class="ci-qty-btn" onclick="changeQty(${idx},1)">+</button>
+            </div>
+            <button class="ci-del" onclick="removeFromCart(${idx})"><i class="fa-solid fa-trash"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  const subtotal = cart.reduce((s,i)=>s+i.price*i.qty,0);
+  const shipping = subtotal > 500000 ? 0 : 15000;
+  const total = subtotal + shipping;
+  foot.innerHTML = `
+    <div class="cart-subtotal">
+      <span>Fanombanana:</span><span>${fmtPrice(subtotal)}</span>
+    </div>
+    <div class="cart-subtotal" style="color:var(--green);font-size:13px">
+      <span>Fitevinam-bidy:</span>
+      <span>${shipping===0 ? 'Maimaim-poana' : fmtPrice(shipping)}</span>
+    </div>
+    <div class="cart-total-row">
+      <div class="cart-total-lbl">Total:</div>
+      <div class="cart-total-price">${fmtPrice(total)}</div>
+    </div>
+    <button class="btn-checkout" onclick="openCheckout()">
+      <i class="fa-solid fa-lock"></i> Manamarina baiko
+    </button>
+  `;
+}
+function addToCart(id, variant='', qty=1){
+  const prod = PRODUCTS.find(p=>p.id===id);
+  if(!prod) return;
+  const key = `${id}-${variant}`;
+  const existing = cart.find(i=>i.key===key);
+  if(existing){ existing.qty += qty; }
+  else { cart.push({key,id,name:prod.name,price:prod.price,img:prod.img,variant,qty}); }
+  saveCart();
+  updateCartBadge();
+  showNotif(`"${prod.name.substring(0,30)}..." nampiana ao amin'ny basket!`, 'cart');
+}
+function changeQty(idx, delta){
+  if(!cart[idx]) return;
+  cart[idx].qty = Math.max(1, cart[idx].qty + delta);
+  saveCart(); updateCartBadge(); renderCart();
+}
+function setQty(idx, val){
+  if(!cart[idx]) return;
+  cart[idx].qty = Math.max(1, parseInt(val)||1);
+  saveCart(); updateCartBadge(); renderCart();
+}
+function removeFromCart(idx){
+  cart.splice(idx, 1);
+  saveCart(); updateCartBadge(); renderCart();
+  showNotif('Vokatra nesorina.', 'info');
+}
+
+// ===========================
+// WISHLIST
+// ===========================
+function toggleWish(id, btn){
+  const idx = wishlist.indexOf(id);
+  if(idx>-1){ wishlist.splice(idx,1); btn.classList.remove('active'); showNotif('Nesorina avy amin\'ny tiako','info'); }
+  else { wishlist.push(id); btn.classList.add('active'); showNotif('Nampiana ao amin\'ny tiako! ❤️','success'); }
+  saveWish();
+}
+function isWished(id){ return wishlist.includes(id); }
+
+// ===========================
+// FORMAT
+// ===========================
+function fmtPrice(v){ return new Intl.NumberFormat('fr-MG',{style:'currency',currency:'MGA',maximumFractionDigits:0}).format(v); }
+function fmtDisc(old, cur){ return Math.round((1-cur/old)*100); }
+function renderStars(r){
+  let s='';
+  for(let i=1;i<=5;i++){
+    if(r>=i) s+=`<i class="fa-solid fa-star"></i>`;
+    else if(r>=i-.5) s+=`<i class="fa-solid fa-star-half-stroke"></i>`;
+    else s+=`<i class="fa-regular fa-star"></i>`;
+  }
+  return s;
+}
+
+// ===========================
+// PRODUCT CARD
+// ===========================
+function makeCard(prod){
+  const disc = prod.oldPrice ? fmtDisc(prod.oldPrice, prod.price) : 0;
+  const wl = isWished(prod.id);
+  const badges = {sale:'bdg-sale',new:'bdg-new',hot:'bdg-hot'};
+  const badgeTxt = {sale:`-${disc}%`,new:'VAOVAO',hot:'🔥 MALAZA'};
+  return `
+    <div class="pc" onclick="openPD(${prod.id})">
+      ${prod.badge ? `<div class="pc-bdg ${badges[prod.badge]}">${badgeTxt[prod.badge]}</div>` : ''}
+      <button class="wl-btn ${wl?'active':''}" onclick="event.stopPropagation();toggleWish(${prod.id},this)" title="Tiako">
+        <i class="fa-${wl?'solid':'regular'} fa-heart"></i>
+      </button>
+      <div class="pc-img"><img src="${prod.img}" alt="${prod.name}" loading="lazy"></div>
+      <div class="pc-info">
+        <div class="pc-name">${prod.name}</div>
+        <div class="pc-pr-row">
+          <div class="pc-price">${fmtPrice(prod.price)}</div>
+          ${prod.oldPrice ? `<div class="pc-old">${fmtPrice(prod.oldPrice)}</div>` : ''}
+          ${disc > 0 ? `<div class="pc-disc">-${disc}%</div>` : ''}
+        </div>
+        <div class="pc-rat">
+          <div class="stars">${renderStars(prod.rating)}</div>
+          <div class="rat-cnt">(${prod.ratingCount.toLocaleString()})</div>
+        </div>
+        <div class="pc-ship"><i class="fa-solid fa-truck"></i> ${prod.ship}</div>
+        <button class="pc-add" onclick="event.stopPropagation();addToCart(${prod.id})">
+          <i class="fa-solid fa-cart-plus"></i> Vaidy ao amin'ny basket
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+// ===========================
+// FLASH CARD
+// ===========================
+function makeFlashCard(prod){
+  const disc = fmtDisc(prod.oldPrice, prod.price);
+  return `
+    <div class="fp-card" onclick="openPD(${prod.id})">
+      <div class="fp-img">
+        <img src="${prod.img}" alt="${prod.name}" loading="lazy">
+        <div class="fp-bdg">-${disc}%</div>
+      </div>
+      <div class="fp-prog-wrap"><div class="fp-prog" style="width:${prod.flashProg}%"></div></div>
+      <div class="fp-prog-txt">${prod.flashProg}% nivarotana</div>
+      <div class="fp-info">
+        <div class="fp-name">${prod.name}</div>
+        <div>
+          <span class="fp-price">${fmtPrice(prod.price)}</span>
+          <span class="fp-old">${fmtPrice(prod.oldPrice)}</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ===========================
+// HOME RENDER
+// ===========================
+function renderHome(){
+  const flashProds = PRODUCTS.filter(p=>p.flash);
+  document.getElementById('flash-prods').innerHTML = flashProds.map(makeFlashCard).join('');
+
+  // Recommended: shuffle
+  const rec = [...PRODUCTS].sort(()=>Math.random()-.5).slice(0,10);
+  document.getElementById('rec-grid').innerHTML = rec.map(makeCard).join('');
+
+  // Best sellers: by sold
+  const best = [...PRODUCTS].sort((a,b)=>b.sold-a.sold).slice(0,10);
+  document.getElementById('best-grid').innerHTML = best.map(makeCard).join('');
+}
+
+// ===========================
+// CATEGORY FILTER
+// ===========================
+function filterCat(cat, btnEl){
+  currentCat = cat;
+  currentSort = 'default';
+  document.querySelectorAll('.cn-item').forEach(b=>b.classList.remove('active'));
+  if(btnEl) btnEl.classList.add('active');
+
+  document.getElementById('page-home').style.display = 'none';
+  document.getElementById('page-list').style.display = 'block';
+  document.getElementById('pd-panel').classList.remove('open');
+
+  const catLabels = {
+    rehetra:'Vokatra Rehetra',fitafiana:'👗 Fitafiana',
+    elektronika:'📱 Elektrônika',trano:'🏡 Trano & Fanaka',
+    fanatanjahana:'⚽ Fanatanjahana',zanahary:'🌿 Zanahary',
+    zaza:'🧒 Zaza',fiara:'🚗 Fiara',hoavy:'💎 Hoavy',
+    sakafo:'🥘 Sakafo',boky:'📚 Boky',fanandroana:'🎮 Fanandroana'
+  };
+  document.getElementById('list-title').textContent = catLabels[cat] || cat;
+  renderList();
+}
+
+function renderList(){
+  let prods = cat => cat === 'rehetra' ? [...PRODUCTS] : PRODUCTS.filter(p=>p.cat===currentCat);
+  let list = prods(currentCat);
+
+  if(currentSort === 'price-asc') list.sort((a,b)=>a.price-b.price);
+  else if(currentSort === 'price-desc') list.sort((a,b)=>b.price-a.price);
+  else if(currentSort === 'rating') list.sort((a,b)=>b.rating-a.rating);
+  else if(currentSort === 'newest') list.sort(()=>Math.random()-.5);
+
+  document.getElementById('list-count').textContent = `${list.length} vokatra`;
+  document.getElementById('list-grid').innerHTML = list.map(makeCard).join('');
+}
+
+function sortList(type, btn){
+  currentSort = type;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderList();
+}
+
+// ===========================
+// SEARCH
+// ===========================
+function doSearch(){
+  const q = document.getElementById('search-inp').value.trim().toLowerCase();
+  if(!q) return;
+  const catSel = document.getElementById('search-cat').value;
+
+  let results = PRODUCTS.filter(p=>{
+    const matchQ = p.name.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q);
+    const matchCat = catSel === 'Rehetra' || getCatLabelMG(catSel) === p.cat;
+    return matchQ && matchCat;
+  });
+
+  document.getElementById('page-home').style.display = 'none';
+  document.getElementById('page-list').style.display = 'block';
+  document.getElementById('pd-panel').classList.remove('open');
+  document.querySelectorAll('.cn-item').forEach(b=>b.classList.remove('active'));
+
+  document.getElementById('list-title').textContent = `Valiny ho an'ny: "${q}"`;
+  document.getElementById('list-count').textContent = `${results.length} vokatra hita`;
+  document.getElementById('list-grid').innerHTML = results.length
+    ? results.map(makeCard).join('')
+    : `<div style="padding:40px;text-align:center;color:var(--g5);grid-column:1/-1">
+         <i class="fa-solid fa-magnifying-glass" style="font-size:48px;opacity:.3;margin-bottom:12px;display:block"></i>
+         <p style="font-size:16px;font-weight:700">Tsy hita ny vokatra ho an'ny "${q}"</p>
+         <p style="font-size:13px;margin-top:6px">Andramo ny teny hafa na ny sokajy hafa</p>
+       </div>`;
+}
+
+function getCatLabelMG(label){
+  const m = {'Fitafiana':'fitafiana','Elektrônika':'elektronika','Trano':'trano','Fanatanjahan-tena':'fanatanjahana','Zanahary':'zanahary','Zaza':'zaza'};
+  return m[label] || 'rehetra';
+}
+
+// ===========================
+// PRODUCT DETAIL
+// ===========================
+let pdSelectedColor = 0;
+let pdSelectedSize = '';
+let pdQty = 1;
+
+function openPD(id){
+  const prod = PRODUCTS.find(p=>p.id===id);
+  if(!prod) return;
+  currentProd = prod;
+  pdSelectedColor = 0;
+  pdSelectedSize = prod.sizes[0] || '';
+  pdQty = 1;
+
+  const disc = prod.oldPrice ? fmtDisc(prod.oldPrice, prod.price) : 0;
+  const specHtml = Object.entries(prod.specs).map(([k,v])=>`
+    <div class="spec-row"><div class="spec-key">${k}</div><div class="spec-val">${v}</div></div>
+  `).join('');
+
+  const revBars = [5,4,3,2,1].map(star=>{
+    const cnt = prod.reviews.filter(r=>r.stars===star).length;
+    const pct = prod.reviews.length ? (cnt/prod.reviews.length)*100 : 0;
+    return `<div class="rev-bar-row">
+      <div class="rev-bar-lbl">${star}⭐</div>
+      <div class="rev-bar-bg"><div class="rev-bar-fill" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+
+  const reviewsHtml = prod.reviews.map(r=>`
+    <div class="rev-item">
+      <div class="rev-hdr">
+        <div class="rev-ava">${r.user.charAt(0)}</div>
+        <div>
+          <div class="rev-user">${r.user}</div>
+          <div class="stars">${renderStars(r.stars)}</div>
+        </div>
+        <div class="rev-date">${r.date}</div>
+      </div>
+      <div class="rev-text">${r.text}</div>
+    </div>
+  `).join('');
+
+  const thumbsHtml = prod.imgs.map((img,i)=>`
+    <div class="thumb ${i===0?'active':''}" onclick="changePDImg('${img}',this)">
+      <img src="${img}" alt="" loading="lazy">
+    </div>
+  `).join('');
+
+  const colorsHtml = prod.colors.length ? `
+    <div class="pd-section">
+      <div class="pd-sec-title">Loko</div>
+      <div class="var-row" id="pd-colors">
+        ${prod.colors.map((c,i)=>`
+          <div class="swatch ${i===0?'active':''}" style="background:${c}" 
+            onclick="selectColor(${i},this)" title="${c}"></div>
+        `).join('')}
+      </div>
+    </div>
+  ` : '';
+
+  const sizesHtml = prod.sizes.length ? `
+    <div class="pd-section">
+      <div class="pd-sec-title">Habeny</div>
+      <div class="var-row" id="pd-sizes">
+        ${prod.sizes.map((s,i)=>`
+          <button class="var-btn ${i===0?'active':''}" onclick="selectSize('${s}',this)">${s}</button>
+        `).join('')}
+      </div>
+    </div>
+  ` : '';
+
+  document.getElementById('pd-content').innerHTML = `
+    <div class="pd-wrap">
+      <div class="pd-imgs">
+        <div class="pd-main-img">
+          <img id="pd-main-img" src="${prod.imgs[0]}" alt="${prod.name}">
+        </div>
+        <div class="thumb-row">${thumbsHtml}</div>
+      </div>
+      <div class="pd-info">
+        <div class="pd-title">${prod.name}</div>
+        <div class="pd-price-row">
+          <div class="pd-price">${fmtPrice(prod.price)}</div>
+          ${prod.oldPrice ? `<div class="pd-old">${fmtPrice(prod.oldPrice)}</div>` : ''}
+          ${disc > 0 ? `<div class="pd-disc-tag">-${disc}%</div>` : ''}
+        </div>
+        <div class="pd-rat-row">
+          <div class="stars" style="font-size:16px">${renderStars(prod.rating)}</div>
+          <div class="rat-cnt">${prod.rating} (${prod.ratingCount.toLocaleString()} hevitra)</div>
+          <div class="pd-orders">${prod.sold.toLocaleString()} nivarotana</div>
+        </div>
+
+        ${colorsHtml}
+        ${sizesHtml}
+
+        <div class="pd-section">
+          <div class="pd-sec-title">Isan-taona</div>
+          <div class="qty-row">
+            <div class="qty-ctrl">
+              <button class="qty-btn" onclick="changePDQty(-1)">−</button>
+              <input class="qty-num" id="pd-qty" type="number" value="1" min="1" max="999" readonly>
+              <button class="qty-btn" onclick="changePDQty(1)">+</button>
+            </div>
+            <div class="qty-stock">Misy vokatra (${(prod.sold*0.1|0)+50} sisa)</div>
+          </div>
+        </div>
+
+        <div class="pd-actions">
+          <button class="btn-cart" onclick="pdAddToCart()">
+            <i class="fa-solid fa-cart-plus"></i> Basket
+          </button>
+          <button class="btn-buy" onclick="pdBuyNow()">
+            <i class="fa-solid fa-bolt"></i> Mividy izao
+          </button>
+        </div>
+
+        <div class="pd-section" style="margin-top:16px">
+          <div class="pd-sec-title">Fanaterana</div>
+          <div class="deli-row">
+            <div class="deli-item"><i class="fa-solid fa-truck deli-ico"></i> ${prod.ship}</div>
+            <div class="deli-item"><i class="fa-solid fa-rotate-left deli-ico"></i> Averina ao anatin'ny 15 andro</div>
+            <div class="deli-item"><i class="fa-solid fa-shield-halved deli-ico"></i> Fiarovana mpividy</div>
+          </div>
+        </div>
+
+        <div class="pd-section">
+          <div class="pd-sec-title">Toetran-javatra</div>
+          <div class="specs-grid">${specHtml}</div>
+        </div>
+
+        <div class="pd-section">
+          <div class="pd-sec-title">Fampidirana</div>
+          <p style="font-size:14px;line-height:1.7;color:var(--g7)">${prod.desc}</p>
+        </div>
+
+        <div style="padding-bottom:20px">
+          <div class="pd-sec-title" style="font-size:13px;font-weight:700;color:var(--g5);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">💬 Hevitry ny Mpividy</div>
+          <div class="rev-sum">
+            <div class="rev-big">${prod.rating}</div>
+            <div>
+              <div class="stars" style="font-size:20px;margin-bottom:8px">${renderStars(prod.rating)}</div>
+              <div style="font-size:13px;color:var(--g5)">${prod.ratingCount.toLocaleString()} hevitra</div>
+            </div>
+            <div class="rev-bars">${revBars}</div>
+          </div>
+          <div>${reviewsHtml}</div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('pd-panel').classList.add('open');
+  document.getElementById('pd-panel').scrollTop = 0;
+}
+
+function closePD(){
+  document.getElementById('pd-panel').classList.remove('open');
+}
+
+function changePDImg(src, thumb){
+  document.getElementById('pd-main-img').src = src;
+  document.querySelectorAll('.thumb').forEach(t=>t.classList.remove('active'));
+  thumb.classList.add('active');
+}
+
+function selectColor(idx, btn){
+  pdSelectedColor = idx;
+  document.querySelectorAll('#pd-colors .swatch').forEach(s=>s.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function selectSize(size, btn){
+  pdSelectedSize = size;
+  document.querySelectorAll('#pd-sizes .var-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function changePDQty(delta){
+  pdQty = Math.max(1, pdQty + delta);
+  const el = document.getElementById('pd-qty');
+  if(el) el.value = pdQty;
+}
+
+function pdAddToCart(){
+  if(!currentProd) return;
+  let variant = '';
+  if(currentProd.colors.length) variant += `Loko:${currentProd.colors[pdSelectedColor]}`;
+  if(currentProd.sizes.length) variant += (variant?' | ':'') + `Habeny:${pdSelectedSize}`;
+  addToCart(currentProd.id, variant, pdQty);
+}
+
+function pdBuyNow(){
+  pdAddToCart();
+  closePD();
+  openCheckout();
+}
+
+// ===========================
+// CHECKOUT
+// ===========================
+function openCheckout(){
+  if(!cart.length){ showNotif('Tsy misy vokatra ao amin\'ny basket!','error'); return; }
+  closeCart();
+  const subtotal = cart.reduce((s,i)=>s+i.price*i.qty,0);
+  const shipping = subtotal > 500000 ? 0 : 15000;
+  const total = subtotal + shipping;
+  const itemsHtml = cart.map(i=>`
+    <div class="order-sum-row">
+      <span>${i.name.substring(0,28)}... x${i.qty}</span>
+      <span>${fmtPrice(i.price*i.qty)}</span>
+    </div>
+  `).join('');
+  document.getElementById('order-sum-preview').innerHTML = `
+    <div class="order-sum-title">📋 Famintinana baiko</div>
+    ${itemsHtml}
+    <div class="order-sum-row" style="color:var(--green)">
+      <span>Fitevinam-bidy</span>
+      <span>${shipping===0?'Maimaim-poana':fmtPrice(shipping)}</span>
+    </div>
+    <div class="order-sum-total">
+      <span>Total</span><span>${fmtPrice(total)}</span>
+    </div>
+  `;
+  document.getElementById('checkout-ov').classList.add('active');
+}
+
+function closeCheckout(){
+  document.getElementById('checkout-ov').classList.remove('active');
+}
+
+function confirmOrder(){
+  const fname = document.getElementById('f-fname').value.trim();
+  const lname = document.getElementById('f-lname').value.trim();
+  const email = document.getElementById('f-email').value.trim();
+  const phone = document.getElementById('f-phone').value.trim();
+  const addr  = document.getElementById('f-addr').value.trim();
+  if(!fname||!lname||!email||!phone||!addr){
+    showNotif('Fenoy ny saha rehetra voafetra!','error'); return;
+  }
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+    showNotif('Adiresy email tsy mety!','error'); return;
+  }
+  closeCheckout();
+  cart = [];
+  saveCart();
+  updateCartBadge();
+  document.getElementById('success-ov').classList.add('active');
+}
+
+function closeSuccess(){
+  document.getElementById('success-ov').classList.remove('active');
+  showHome();
+}
+
+// ===========================
+// WISHLIST PAGE
+// ===========================
+function showWishlist(){
+  document.getElementById('page-home').style.display = 'none';
+  document.getElementById('page-list').style.display = 'block';
+  document.getElementById('pd-panel').classList.remove('open');
+  document.querySelectorAll('.cn-item').forEach(b=>b.classList.remove('active'));
+  const list = PRODUCTS.filter(p=>wishlist.includes(p.id));
+  document.getElementById('list-title').textContent = '❤️ Ny tiako';
+  document.getElementById('list-count').textContent = `${list.length} vokatra`;
+  document.getElementById('list-grid').innerHTML = list.length
+    ? list.map(makeCard).join('')
+    : `<div style="padding:40px;text-align:center;color:var(--g5);grid-column:1/-1">
+         <i class="fa-solid fa-heart" style="font-size:48px;opacity:.3;display:block;margin-bottom:12px"></i>
+         <p style="font-size:16px;font-weight:700">Tsy misy vokatra ao amin'ny lisitry ny tiako</p>
+         <p style="font-size:13px;margin-top:6px">Tsindrio ilay fo ❤️ amin'ny vokatra tianao</p>
+       </div>`;
+}
+
+// ===========================
+// ORDERS PAGE
+// ===========================
+function showOrders(){
+  document.getElementById('page-home').style.display = 'none';
+  document.getElementById('page-list').style.display = 'block';
+  document.getElementById('pd-panel').classList.remove('open');
+  document.querySelectorAll('.cn-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById('list-title').textContent = '📦 Ny baiko avy';
+  document.getElementById('list-count').textContent = '';
+  document.getElementById('list-grid').innerHTML = `
+    <div style="padding:50px 20px;text-align:center;color:var(--g5);grid-column:1/-1">
+      <i class="fa-solid fa-box" style="font-size:56px;opacity:.3;display:block;margin-bottom:14px"></i>
+      <p style="font-size:16px;font-weight:700;margin-bottom:8px">Tsy mbola manana baiko ianao</p>
+      <p style="font-size:13px">Manomboka mividy ianao dia hiseho eto ny baiko</p>
+      <button onclick="showHome()" style="margin-top:16px;background:var(--red);color:#fff;padding:10px 24px;border-radius:var(--r2);font-weight:700;font-size:14px">
+        <i class="fa-solid fa-shopping-bag"></i> Manomboka mividy
+      </button>
+    </div>
+  `;
+}
+
+// ===========================
+// SHOW HOME
+// ===========================
+function showHome(){
+  document.getElementById('page-home').style.display = 'block';
+  document.getElementById('page-list').style.display = 'none';
+  document.getElementById('pd-panel').classList.remove('open');
+  document.querySelectorAll('.cn-item').forEach(b=>b.classList.remove('active'));
+  document.querySelector('.cn-item').classList.add('active');
+  currentCat = 'rehetra';
+  document.getElementById('search-inp').value = '';
+}
+
+function showAllFlash(){
+  const flashProds = PRODUCTS.filter(p=>p.flash);
+  document.getElementById('page-home').style.display = 'none';
+  document.getElementById('page-list').style.display = 'block';
+  document.querySelectorAll('.cn-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById('list-title').textContent = '⚡ Fivarotana Maingay';
+  document.getElementById('list-count').textContent = `${flashProds.length} vokatra`;
+  document.getElementById('list-grid').innerHTML = flashProds.map(makeCard).join('');
+}
+
+// ===========================
+// FLASH SALE TIMER
+// ===========================
+function startTimer(){
+  let total = 5 * 3600 + 47 * 60 + 23;
+  function tick(){
+    total--;
+    if(total < 0) total = 24 * 3600;
+    const h = String(Math.floor(total/3600)).padStart(2,'0');
+    const m = String(Math.floor((total%3600)/60)).padStart(2,'0');
+    const s = String(total%60).padStart(2,'0');
+    const H = document.getElementById('t-h');
+    const M = document.getElementById('t-m');
+    const S = document.getElementById('t-s');
+    if(H) H.textContent = h;
+    if(M) M.textContent = m;
+    if(S) S.textContent = s;
+  }
+  flashInterval = setInterval(tick, 1000);
+}
+
+// ===========================
+// KEYBOARD SHORTCUTS
+// ===========================
+document.addEventListener('keydown', e=>{
+  if(e.key === 'Escape'){
+    if(document.getElementById('pd-panel').classList.contains('open')){ closePD(); return; }
+    if(document.getElementById('cart-drawer').classList.contains('open')){ closeCart(); return; }
+    if(document.getElementById('checkout-ov').classList.contains('active')){ closeCheckout(); return; }
+  }
+});
+
+// ===========================
+// INIT
+// ===========================
+document.addEventListener('DOMContentLoaded', ()=>{
+  renderHome();
+  updateCartBadge();
+  startTimer();
+  // Restore wishlist UI
+  setTimeout(()=>{
+    document.querySelectorAll('.wl-btn').forEach(btn=>{
+      const id = parseInt(btn.closest('.pc')?.querySelector('.pc-add')?.getAttribute('onclick')?.match(/\d+/)?.[0]);
+      if(id && wishlist.includes(id)) btn.classList.add('active');
+    });
+  }, 100);
+});
+</script>
+</body>
+</html>
